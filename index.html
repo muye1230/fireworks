@@ -2,19 +2,30 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🎆 绚丽烟花特效</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="wechat-enable-web-view-scroll" content="false">
+    <title>🎆 点击绽放绚丽烟花</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         body {
             overflow: hidden;
             background: linear-gradient(to bottom, #0a0a20 0%, #1a1a40 50%, #2a2a50 100%);
             touch-action: none;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
         }
 
         canvas {
@@ -22,6 +33,8 @@
             position: fixed;
             top: 0;
             left: 0;
+            width: 100%;
+            height: 100%;
         }
 
         .hint {
@@ -29,51 +42,76 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.8);
             font-size: 16px;
-            font-family: 'Microsoft YaHei', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
             text-align: center;
             pointer-events: none;
             z-index: 100;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
             animation: pulse 2s ease-in-out infinite;
+            padding: 0 20px;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 0.7; }
+            0%, 100% { opacity: 0.8; }
             50% { opacity: 1; }
         }
 
-        @media (max-width: 768px) {
-            .hint {
-                font-size: 14px;
-                bottom: 20px;
-            }
+        .wechat-hint {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 10px;
+            border-radius: 5px;
+            color: rgba(255,255,255,0.6);
+            font-size: 12px;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
-    <div class="hint" id="hint">📱 点击屏幕 | 💻 按任意键 绽放烟花</div>
+    <div class="hint" id="hint">👆 点击屏幕任意位置<br>绽放绚丽烟花</div>
+    <div class="wechat-hint" id="wechatHint"></div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const hint = document.getElementById('hint');
+        const wechatHint = document.getElementById('wechatHint');
 
-        // 设置画布尺寸
+        // 检测微信浏览器
+        function isWeChat() {
+            return /micromessenger/i.test(navigator.userAgent);
+        }
+
+        if (isWeChat()) {
+            wechatHint.textContent = '🎆 微信中打开';
+        }
+
+        // 设置画布尺寸（微信优化）
         function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            canvas.style.width = window.innerWidth + 'px';
+            canvas.style.height = window.innerHeight + 'px';
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
         }
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // 隐藏提示文字（3秒后）
+        // 防止微信下拉刷新和页面滚动
+        document.body.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+        }, { passive: false });
+
+        // 隐藏提示文字
         setTimeout(() => {
             hint.style.opacity = '0';
             hint.style.transition = 'opacity 1s ease';
-        }, 3000);
+        }, 4000);
 
         // 烟花粒子类
         class Particle {
@@ -126,7 +164,6 @@
             }
 
             draw() {
-                // 绘制尾迹
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(this.trail[0]?.x || this.x, this.trail[0]?.y || this.y);
@@ -141,7 +178,6 @@
                 ctx.stroke();
                 ctx.restore();
 
-                // 绘制烟花主体
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -153,7 +189,6 @@
             }
 
             update() {
-                // 记录尾迹
                 this.trail.push({ x: this.x, y: this.y });
                 if (this.trail.length > 10) {
                     this.trail.shift();
@@ -163,7 +198,6 @@
                 this.x += this.velocity.x;
                 this.y += this.velocity.y;
 
-                // 到达目标高度或速度减慢时爆炸
                 if (this.velocity.y >= -1 || this.y <= this.targetY) {
                     this.exploded = true;
                     this.createExplosion();
@@ -182,7 +216,6 @@
                         y: Math.sin(angle) * speed
                     };
                     
-                    // 颜色变化 - 多种颜色组合
                     const hueVariation = (Math.random() - 0.5) * 60;
                     const color = `hsl(${(parseInt(this.color.match(/\d+/)[0]) + hueVariation) % 360}, 
                                         ${80 + Math.random() * 20}%, 
@@ -194,7 +227,6 @@
                     this.particles.push(new Particle(this.x, this.y, color, velocity, size, decay));
                 }
 
-                // 添加闪烁粒子
                 for (let i = 0; i < 20; i++) {
                     const angle = Math.random() * Math.PI * 2;
                     const speed = 2 + Math.random() * 3;
@@ -210,27 +242,21 @@
             }
         }
 
-        // 存储所有烟花和粒子
         let fireworks = [];
         let allParticles = [];
 
-        // 创建烟花
         function createFirework(x, y) {
             const targetY = y - 100 - Math.random() * 150;
-            fireworks.push(new Firework(x, canvas.height, targetY));
+            fireworks.push(new Firework(x, canvas.height / window.devicePixelRatio, targetY));
         }
 
-        // 直接在点击位置爆炸
         function createExplosion(x, y) {
             const particleCount = 100 + Math.floor(Math.random() * 50);
             const colors = [
                 `hsl(${Math.random() * 360}, 100%, 50%)`,
                 `hsl(${Math.random() * 360}, 100%, 60%)`,
                 `hsl(${Math.random() * 360}, 100%, 70%)`,
-                '#FFD700',
-                '#FF6B6B',
-                '#4ECDC4',
-                '#A8E6CF'
+                '#FFD700', '#FF6B6B', '#4ECDC4', '#A8E6CF'
             ];
 
             for (let i = 0; i < particleCount; i++) {
@@ -247,15 +273,12 @@
             }
         }
 
-        // 动画循环
         function animate() {
             requestAnimationFrame(animate);
             
-            // 半透明背景实现拖尾效果
             ctx.fillStyle = 'rgba(10, 10, 32, 0.15)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
 
-            // 更新和绘制烟花
             for (let i = fireworks.length - 1; i >= 0; i--) {
                 fireworks[i].update();
                 fireworks[i].draw();
@@ -266,7 +289,6 @@
                 }
             }
 
-            // 更新和绘制粒子
             for (let i = allParticles.length - 1; i >= 0; i--) {
                 allParticles[i].update();
                 allParticles[i].draw();
@@ -277,7 +299,7 @@
             }
         }
 
-        // 手机端 - 触摸事件
+        // 微信优化的触摸事件
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             for (let touch of e.touches) {
@@ -285,46 +307,39 @@
             }
         }, { passive: false });
 
-        // 手机端 - 点击事件
         canvas.addEventListener('click', (e) => {
             createExplosion(e.clientX, e.clientY);
         });
 
-        // 电脑端 - 键盘事件
         document.addEventListener('keydown', (e) => {
-            const x = Math.random() * canvas.width;
-            const y = Math.random() * canvas.height * 0.7;
+            const x = Math.random() * canvas.width / window.devicePixelRatio;
+            const y = Math.random() * canvas.height / window.devicePixelRatio * 0.7;
             createExplosion(x, y);
             
-            // 偶尔同时发射上升烟花
             if (Math.random() > 0.5) {
                 createFirework(x, y);
             }
         });
 
-        // 电脑端 - 鼠标点击也支持
         canvas.addEventListener('mousedown', (e) => {
             createExplosion(e.clientX, e.clientY);
         });
 
-        // 自动随机烟花（可选，增加氛围）
         setInterval(() => {
             if (Math.random() > 0.7) {
-                const x = Math.random() * canvas.width;
-                const y = Math.random() * canvas.height * 0.5 + canvas.height * 0.2;
+                const x = Math.random() * canvas.width / window.devicePixelRatio;
+                const y = Math.random() * canvas.height / window.devicePixelRatio * 0.5 + canvas.height / window.devicePixelRatio * 0.2;
                 createFirework(x, y);
             }
         }, 1500);
 
-        // 启动动画
         animate();
 
-        // 初始展示几个烟花
         setTimeout(() => {
             for (let i = 0; i < 3; i++) {
                 setTimeout(() => {
-                    const x = Math.random() * canvas.width;
-                    createFirework(x, canvas.height * 0.3);
+                    const x = Math.random() * canvas.width / window.devicePixelRatio;
+                    createFirework(x, canvas.height / window.devicePixelRatio * 0.3);
                 }, i * 300);
             }
         }, 500);
