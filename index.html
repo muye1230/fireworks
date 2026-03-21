@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
     <meta name="wechat-enable-web-view-scroll" content="false">
-    <title>🎆 点击绽放绚丽烟花</title>
+    <title>🌊 魔法蓝藻 - 梦幻浮动特效</title>
     <style>
         * {
             margin: 0;
@@ -21,7 +21,7 @@
 
         body {
             overflow: hidden;
-            background: linear-gradient(to bottom, #0a0a20 0%, #1a1a40 50%, #2a2a50 100%);
+            background: linear-gradient(180deg, #e8f4f8 0%, #b8d8e8 50%, #88c0d8 100%);
             touch-action: none;
             width: 100vw;
             height: 100vh;
@@ -37,50 +37,220 @@
             height: 100%;
         }
 
+        /* 音乐控制面板 */
+        .music-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 8px 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .music-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .music-btn:active {
+            transform: scale(0.9);
+        }
+
+        .music-btn.playing {
+            animation: pulse-music 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-music {
+            0%, 100% { box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.8); }
+        }
+
+        .music-info {
+            color: #333;
+            font-size: 12px;
+            max-width: 150px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* 提示文字 */
         .hint {
             position: fixed;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255, 255, 255, 0.8);
-            font-size: 16px;
+            color: rgba(50, 80, 100, 0.8);
+            font-size: 15px;
             font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
             text-align: center;
             pointer-events: none;
             z-index: 100;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-            animation: pulse 2s ease-in-out infinite;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+            animation: hint-fade 3s ease-in-out forwards;
             padding: 0 20px;
+            line-height: 1.6;
         }
 
-        @keyframes pulse {
-            0%, 100% { opacity: 0.8; }
-            50% { opacity: 1; }
+        @keyframes hint-fade {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
         }
 
         .wechat-hint {
             position: fixed;
             top: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.1);
-            padding: 5px 10px;
-            border-radius: 5px;
-            color: rgba(255,255,255,0.6);
+            left: 10px;
+            background: rgba(255,255,255,0.4);
+            padding: 5px 12px;
+            border-radius: 15px;
+            color: rgba(50, 80, 100, 0.7);
             font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        /* 装饰元素 - 水波纹 */
+        .wave-decoration {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='%23ffffff' fill-opacity='0.3' d='M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z'%3E%3C/path%3E%3C/svg%3E") no-repeat bottom;
+            background-size: cover;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* 加载提示 */
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #e8f4f8 0%, #b8d8e8 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            color: #335577;
+            font-size: 18px;
+            margin-top: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(102, 126, 234, 0.2);
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 开始按钮 */
+        .start-btn {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+            font-family: -apple-system, BlinkMacSystemFont, 'Microsoft YaHei', sans-serif;
+        }
+
+        .start-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+
+        .start-btn.hidden {
+            opacity: 0;
             pointer-events: none;
         }
     </style>
 </head>
 <body>
+    <!-- 加载页面 -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">正在加载魔法蓝藻...</div>
+    </div>
+
+    <!-- 开始按钮（用于触发音频播放） -->
+    <button class="start-btn" id="startBtn">✨ 开启魔法蓝藻之旅</button>
+
     <canvas id="canvas"></canvas>
-    <div class="hint" id="hint">👆 点击屏幕任意位置<br>绽放绚丽烟花</div>
+    
+    <!-- 水波装饰 -->
+    <div class="wave-decoration"></div>
+    
+    <!-- 微信提示 -->
     <div class="wechat-hint" id="wechatHint"></div>
+    
+    <!-- 音乐控制 -->
+    <div class="music-control">
+        <button class="music-btn" id="musicBtn">🎵</button>
+        <div class="music-info" id="musicInfo">点击播放音乐</div>
+    </div>
+    
+    <!-- 提示文字 -->
+    <div class="hint" id="hint">
+        📱 手机：点击屏幕任意位置<br>
+        💻 电脑：按任意键 或 点击鼠标<br>
+        🌊 观看蓝藻梦幻浮动
+    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const hint = document.getElementById('hint');
         const wechatHint = document.getElementById('wechatHint');
+        const loading = document.getElementById('loading');
+        const startBtn = document.getElementById('startBtn');
+        const musicBtn = document.getElementById('musicBtn');
+        const musicInfo = document.getElementById('musicInfo');
 
         // 检测微信浏览器
         function isWeChat() {
@@ -88,10 +258,10 @@
         }
 
         if (isWeChat()) {
-            wechatHint.textContent = '🎆 微信中打开';
+            wechatHint.textContent = '🌊 微信中打开';
         }
 
-        // 设置画布尺寸（微信优化）
+        // 设置画布尺寸（高清屏优化）
         function resizeCanvas() {
             canvas.width = window.innerWidth * window.devicePixelRatio;
             canvas.height = window.innerHeight * window.devicePixelRatio;
@@ -107,242 +277,285 @@
             e.preventDefault();
         }, { passive: false });
 
-        // 隐藏提示文字
-        setTimeout(() => {
-            hint.style.opacity = '0';
-            hint.style.transition = 'opacity 1s ease';
-        }, 4000);
-
-        // 烟花粒子类
-        class Particle {
-            constructor(x, y, color, velocity, size, decay) {
+        // ========== 蓝藻粒子类 ==========
+        class AlgaeParticle {
+            constructor(x, y) {
                 this.x = x;
                 this.y = y;
-                this.color = color;
-                this.velocity = velocity;
-                this.size = size;
-                this.alpha = 1;
-                this.decay = decay;
-                this.gravity = 0.05;
-                this.friction = 0.99;
-            }
-
-            draw() {
-                ctx.save();
-                ctx.globalAlpha = this.alpha;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = this.color;
-                ctx.fill();
-                ctx.restore();
-            }
-
-            update() {
-                this.velocity.x *= this.friction;
-                this.velocity.y *= this.friction;
-                this.velocity.y += this.gravity;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
-                this.alpha -= this.decay;
-            }
-        }
-
-        // 烟花类
-        class Firework {
-            constructor(x, y, targetY) {
-                this.x = x;
-                this.y = y;
-                this.targetY = targetY;
-                this.velocity = { x: 0, y: -12 - Math.random() * 4 };
-                this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                this.size = 3 + Math.random() * 2;
+                this.originY = y;
+                // 蓝藻颜色 - 多种蓝色调
+                const colors = [
+                    'rgba(0, 150, 255, ',
+                    'rgba(0, 180, 255, ',
+                    'rgba(50, 200, 255, ',
+                    'rgba(100, 220, 255, ',
+                    'rgba(0, 120, 200, ',
+                    'rgba(80, 180, 240, '
+                ];
+                this.baseColor = colors[Math.floor(Math.random() * colors.length)];
+                this.alpha = 0.8;
+                this.size = 2 + Math.random() * 3; // 缩小尺寸
+                this.velocityY = -0.5 - Math.random() * 1.5; // 向上浮动
+                this.velocityX = (Math.random() - 0.5) * 0.8; // 轻微左右摆动
+                this.wobble = Math.random() * Math.PI * 2;
+                this.wobbleSpeed = 0.02 + Math.random() * 0.03;
+                this.wobbleAmount = 0.5 + Math.random() * 0.5;
                 this.trail = [];
-                this.exploded = false;
-                this.particles = [];
+                this.maxTrailLength = 15 + Math.floor(Math.random() * 10);
+                this.life = 1;
+                this.decay = 0.003 + Math.random() * 0.004;
+                this.glow = 10 + Math.random() * 15;
             }
 
             draw() {
-                ctx.save();
-                ctx.beginPath();
-                ctx.moveTo(this.trail[0]?.x || this.x, this.trail[0]?.y || this.y);
-                for (let point of this.trail) {
-                    ctx.lineTo(point.x, point.y);
+                // 绘制拖尾
+                if (this.trail.length > 1) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(this.trail[0].x, this.trail[0].y);
+                    for (let i = 1; i < this.trail.length; i++) {
+                        const point = this.trail[i];
+                        const trailAlpha = (i / this.trail.length) * this.alpha * 0.5;
+                        ctx.lineTo(point.x, point.y);
+                    }
+                    ctx.strokeStyle = this.baseColor + (this.alpha * 0.3) + ')';
+                    ctx.lineWidth = this.size * 0.6;
+                    ctx.lineCap = 'round';
+                    ctx.lineJoin = 'round';
+                    ctx.shadowBlur = this.glow * 0.5;
+                    ctx.shadowColor = this.baseColor + this.alpha + ')';
+                    ctx.stroke();
+                    ctx.restore();
                 }
-                ctx.lineTo(this.x, this.y);
-                ctx.strokeStyle = this.color;
-                ctx.lineWidth = 2;
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = this.color;
-                ctx.stroke();
-                ctx.restore();
 
+                // 绘制蓝藻主体
                 ctx.save();
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = this.color;
+                ctx.fillStyle = this.baseColor + this.alpha + ')';
+                ctx.shadowBlur = this.glow;
+                ctx.shadowColor = this.baseColor + this.alpha + ')';
+                ctx.fill();
+                
+                // 内层高光
+                ctx.beginPath();
+                ctx.arc(this.x - this.size * 0.3, this.y - this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, ' + (this.alpha * 0.6) + ')';
+                ctx.shadowBlur = 0;
                 ctx.fill();
                 ctx.restore();
             }
 
             update() {
+                // 记录拖尾
                 this.trail.push({ x: this.x, y: this.y });
-                if (this.trail.length > 10) {
+                if (this.trail.length > this.maxTrailLength) {
                     this.trail.shift();
                 }
 
-                this.velocity.y += 0.15;
-                this.x += this.velocity.x;
-                this.y += this.velocity.y;
+                // 向上浮动
+                this.y += this.velocityY;
+                // 左右摆动
+                this.wobble += this.wobbleSpeed;
+                this.x += Math.sin(this.wobble) * this.wobbleAmount + this.velocityX;
 
-                if (this.velocity.y >= -1 || this.y <= this.targetY) {
-                    this.exploded = true;
-                    this.createExplosion();
-                }
+                // 逐渐消失
+                this.alpha -= this.decay;
+                this.life -= this.decay;
+
+                // 尺寸逐渐变小
+                this.size = Math.max(0.5, this.size * 0.998);
             }
 
-            createExplosion() {
-                const particleCount = 80 + Math.floor(Math.random() * 70);
-                const explosionRadius = 3 + Math.random() * 3;
-                
-                for (let i = 0; i < particleCount; i++) {
-                    const angle = (Math.PI * 2 / particleCount) * i + Math.random() * 0.5;
-                    const speed = explosionRadius + Math.random() * 5;
-                    const velocity = {
-                        x: Math.cos(angle) * speed,
-                        y: Math.sin(angle) * speed
-                    };
-                    
-                    const hueVariation = (Math.random() - 0.5) * 60;
-                    const color = `hsl(${(parseInt(this.color.match(/\d+/)[0]) + hueVariation) % 360}, 
-                                        ${80 + Math.random() * 20}%, 
-                                        ${50 + Math.random() * 30}%)`;
-                    
-                    const size = 1.5 + Math.random() * 2.5;
-                    const decay = 0.01 + Math.random() * 0.02;
-                    
-                    this.particles.push(new Particle(this.x, this.y, color, velocity, size, decay));
-                }
-
-                for (let i = 0; i < 20; i++) {
-                    const angle = Math.random() * Math.PI * 2;
-                    const speed = 2 + Math.random() * 3;
-                    const velocity = {
-                        x: Math.cos(angle) * speed,
-                        y: Math.sin(angle) * speed
-                    };
-                    const color = `hsl(${Math.random() * 360}, 100%, 80%)`;
-                    const size = 0.5 + Math.random() * 1;
-                    const decay = 0.03 + Math.random() * 0.03;
-                    this.particles.push(new Particle(this.x, this.y, color, velocity, size, decay));
-                }
+            isDead() {
+                return this.alpha <= 0 || this.y < -50;
             }
         }
 
-        let fireworks = [];
-        let allParticles = [];
+        // 存储所有蓝藻粒子
+        let algaeParticles = [];
 
-        function createFirework(x, y) {
-            const targetY = y - 100 - Math.random() * 150;
-            fireworks.push(new Firework(x, canvas.height / window.devicePixelRatio, targetY));
-        }
-
-        function createExplosion(x, y) {
-            const particleCount = 100 + Math.floor(Math.random() * 50);
-            const colors = [
-                `hsl(${Math.random() * 360}, 100%, 50%)`,
-                `hsl(${Math.random() * 360}, 100%, 60%)`,
-                `hsl(${Math.random() * 360}, 100%, 70%)`,
-                '#FFD700', '#FF6B6B', '#4ECDC4', '#A8E6CF'
-            ];
-
-            for (let i = 0; i < particleCount; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 2 + Math.random() * 8;
-                const velocity = {
-                    x: Math.cos(angle) * speed,
-                    y: Math.sin(angle) * speed
-                };
-                const color = colors[Math.floor(Math.random() * colors.length)];
-                const size = 1 + Math.random() * 3;
-                const decay = 0.01 + Math.random() * 0.025;
-                allParticles.push(new Particle(x, y, color, velocity, size, decay));
+        // 创建蓝藻群
+        function createAlgaeBurst(x, y, count = 15) {
+            for (let i = 0; i < count; i++) {
+                const offsetX = (Math.random() - 0.5) * 60;
+                const offsetY = (Math.random() - 0.5) * 30;
+                algaeParticles.push(new AlgaeParticle(x + offsetX, y + offsetY));
             }
         }
 
+        // 动画循环
         function animate() {
             requestAnimationFrame(animate);
             
-            ctx.fillStyle = 'rgba(10, 10, 32, 0.15)';
-            ctx.fillRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
+            // 清除画布（使用半透明实现轻微拖影）
+            ctx.clearRect(0, 0, canvas.width / window.devicePixelRatio, canvas.height / window.devicePixelRatio);
 
-            for (let i = fireworks.length - 1; i >= 0; i--) {
-                fireworks[i].update();
-                fireworks[i].draw();
+            // 更新和绘制所有蓝藻粒子
+            for (let i = algaeParticles.length - 1; i >= 0; i--) {
+                algaeParticles[i].update();
+                algaeParticles[i].draw();
                 
-                if (fireworks[i].exploded) {
-                    allParticles.push(...fireworks[i].particles);
-                    fireworks.splice(i, 1);
-                }
-            }
-
-            for (let i = allParticles.length - 1; i >= 0; i--) {
-                allParticles[i].update();
-                allParticles[i].draw();
-                
-                if (allParticles[i].alpha <= 0) {
-                    allParticles.splice(i, 1);
+                if (algaeParticles[i].isDead()) {
+                    algaeParticles.splice(i, 1);
                 }
             }
         }
 
-        // 微信优化的触摸事件
+        // ========== 事件处理 ==========
+
+        // 手机端 - 触摸事件（优化多点触控）
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             for (let touch of e.touches) {
-                createExplosion(touch.clientX, touch.clientY);
+                createAlgaeBurst(touch.clientX, touch.clientY, 12);
             }
         }, { passive: false });
 
+        // 手机端 - 点击事件
         canvas.addEventListener('click', (e) => {
-            createExplosion(e.clientX, e.clientY);
+            createAlgaeBurst(e.clientX, e.clientY, 15);
         });
 
+        // 电脑端 - 键盘事件
         document.addEventListener('keydown', (e) => {
-            const x = Math.random() * canvas.width / window.devicePixelRatio;
-            const y = Math.random() * canvas.height / window.devicePixelRatio * 0.7;
-            createExplosion(x, y);
-            
-            if (Math.random() > 0.5) {
-                createFirework(x, y);
-            }
+            const x = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+            const y = window.innerHeight * 0.5 + Math.random() * window.innerHeight * 0.3;
+            createAlgaeBurst(x, y, 20);
         });
 
+        // 电脑端 - 鼠标点击
         canvas.addEventListener('mousedown', (e) => {
-            createExplosion(e.clientX, e.clientY);
+            createAlgaeBurst(e.clientX, e.clientY, 18);
         });
 
+        // ========== 音乐播放 ==========
+        
+        // 音乐列表
+        const musicList = [
+            {
+                name: 'Lot to Learn - 柳轻颂',
+                // 注意：QQ音乐链接需要转换为可直接播放的格式
+                // 这里使用备用音频源，你可以替换为实际的mp3链接
+                url: 'https://music.163.com/song/media/outer/url?id=1860163033.mp3'
+            },
+            {
+                name: '星茶会 (钢琴版) - 兮沐',
+                url: 'https://music.163.com/song/media/outer/url?id=1457701294.mp3'
+            }
+        ];
+
+        let currentMusicIndex = 0;
+        let isPlaying = false;
+        let audio = new Audio();
+        audio.loop = false;
+
+        // 初始化音频
+        function initAudio() {
+            audio.src = musicList[currentMusicIndex].url;
+            audio.volume = 0.6;
+            
+            audio.addEventListener('ended', () => {
+                // 播放下一首
+                currentMusicIndex = (currentMusicIndex + 1) % musicList.length;
+                audio.src = musicList[currentMusicIndex].url;
+                if (isPlaying) {
+                    audio.play().catch(e => console.log('播放失败:', e));
+                }
+            });
+
+            audio.addEventListener('error', (e) => {
+                console.log('音频加载失败:', e);
+                musicInfo.textContent = '音乐加载失败';
+            });
+        }
+
+        // 播放/暂停控制
+        function toggleMusic() {
+            if (isPlaying) {
+                audio.pause();
+                musicBtn.textContent = '🎵';
+                musicBtn.classList.remove('playing');
+                isPlaying = false;
+            } else {
+                audio.play().then(() => {
+                    musicBtn.textContent = '⏸️';
+                    musicBtn.classList.add('playing');
+                    isPlaying = true;
+                }).catch(e => {
+                    console.log('播放失败:', e);
+                    musicInfo.textContent = '点击页面后重试';
+                });
+            }
+        }
+
+        // 音乐按钮事件
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleMusic();
+        });
+
+        // 更新音乐信息显示
+        function updateMusicInfo() {
+            musicInfo.textContent = musicList[currentMusicIndex].name;
+        }
+
+        // ========== 初始化 ==========
+
+        // 开始按钮点击（用于触发音频自动播放）
+        startBtn.addEventListener('click', () => {
+            initAudio();
+            updateMusicInfo();
+            
+            // 隐藏加载和开始按钮
+            loading.classList.add('hidden');
+            startBtn.classList.add('hidden');
+            
+            // 自动播放音乐
+            toggleMusic();
+            
+            // 启动动画
+            animate();
+            
+            // 初始创建一些蓝藻
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        const x = Math.random() * window.innerWidth * 0.8 + window.innerWidth * 0.1;
+                        const y = window.innerHeight * 0.7 + Math.random() * window.innerHeight * 0.2;
+                        createAlgaeBurst(x, y, 10);
+                    }, i * 200);
+                }
+            }, 500);
+        });
+
+        // 页面加载完成后显示开始按钮
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                loading.classList.add('hidden');
+            }, 1000);
+        });
+
+        // 性能优化 - 限制粒子数量
+        const MAX_PARTICLES = 500;
         setInterval(() => {
-            if (Math.random() > 0.7) {
-                const x = Math.random() * canvas.width / window.devicePixelRatio;
-                const y = Math.random() * canvas.height / window.devicePixelRatio * 0.5 + canvas.height / window.devicePixelRatio * 0.2;
-                createFirework(x, y);
+            if (algaeParticles.length > MAX_PARTICLES) {
+                algaeParticles.splice(0, algaeParticles.length - MAX_PARTICLES);
             }
-        }, 1500);
+        }, 1000);
 
-        animate();
-
-        setTimeout(() => {
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => {
-                    const x = Math.random() * canvas.width / window.devicePixelRatio;
-                    createFirework(x, canvas.height / window.devicePixelRatio * 0.3);
-                }, i * 300);
+        // 页面可见性变化时暂停/恢复
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                if (isPlaying) {
+                    audio.pause();
+                }
+            } else {
+                if (isPlaying) {
+                    audio.play().catch(e => console.log(e));
+                }
             }
-        }, 500);
+        });
     </script>
 </body>
 </html>
